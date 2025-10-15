@@ -1,0 +1,122 @@
+# ======================================
+# Nextflow pipeline - .gitignore
+# ======================================
+
+# --- Nextflow runtime and temp files ---
+work/
+.cache/
+.nf*
+.nextflow*
+trace.txt
+timeline.html
+report.html
+dag.svg
+params.json
+
+# --- Always keep pipeline scripts (.nf) and configs ---
+!*.nf
+!conf/profiles.config
+
+# --- Results and logs ---
+# Keep folders but ignore their contents
+results/*
+!results/README.md
+
+logs/*
+!logs/README.md
+
+# --- Checkpoints ---
+*checkpoint*
+
+# --- Python cache / build files ---
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+*.manifest
+build/
+dist/
+
+# --- Python / Conda environments ---
+venv/
+.venv/
+.env/
+env/
+envs/
+.conda/
+conda_envs/
+*.yaml.lock
+
+# --- Analysis and data outputs ---
+*.h5ad
+*.h5Seurat
+*.h5
+*.rds
+*.loom
+*.mtx
+*.mtx.gz
+*.mtx.zip
+*.pt
+*.sav
+*.pkl
+*.npz
+*.npy
+*.csv.gz
+*.tar.gz
+*.zip
+*.tif
+*.tiff
+
+# --- Sequencing and genomic data ---
+*.bam
+*.bai
+*.sam
+*.cram
+*.fasta
+*.fasta.fai
+*.fa
+*.fa.fai
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.gtf
+*.gff
+*.gff3
+*.vcf
+*.vcf.gz
+
+# --- Temporary / backup files ---
+*.tmp
+*.bak
+*.swp
+*.swo
+*.log
+*.out
+
+# --- Local configuration (user-specific) ---
+conf/local.config
+*.local.config
+*.private.config
+*.secrets
+*.json
+
+# --- Input and private data ---
+Input_parameters.csv
+data/
+datasets/
+test_data/
+private_data/
+
+# --- Jupyter / notebook checkpoints ---
+.ipynb_checkpoints/
+
+# --- OS-specific files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+
