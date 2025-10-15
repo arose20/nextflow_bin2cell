@@ -1,7 +1,9 @@
 // modules/test_environment.nf
 // Module that tests environment access and Python package availability
 
-process TEST_ENVIRONMENT {
+nextflow.enable.dsl=2
+
+process test_environment {  // <-- make the process name lowercase for consistent import
     tag "test_env"
 
     input:
@@ -9,7 +11,7 @@ process TEST_ENVIRONMENT {
     val env_name
 
     output:
-    path "env_test_done.txt" into env_check_done
+    path "env_test_done.txt"
 
     script:
     """
@@ -77,8 +79,4 @@ PY
     echo "[INFO] ✅ Environment test passed successfully!"
     echo "ok" > env_test_done.txt
     """
-}
-
-def test_environment(env_home, env_name) {
-    TEST_ENVIRONMENT(env_home, env_name)
 }

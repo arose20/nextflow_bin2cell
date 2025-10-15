@@ -43,8 +43,3 @@ process run_analysis {
         > ${params.logdir}/${id}.log 2>&1
     """
 }
-
-// Function wrapper to call this module from main.nf
-def run_analysis(channel, params) {
-    run_analysis(channel)
-}
