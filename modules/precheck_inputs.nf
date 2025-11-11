@@ -1,25 +1,30 @@
-// Module: precheck_inputs.nf
-// Verifies that all files and directories listed in Input_parameters.csv exist
-
 process PRECHECK_INPUTS {
     tag "precheck_inputs"
 
+    conda true
+    conda = '/software/cellgen/team298/ar32/envs/visiumhd_env1'
+    debug true
+
     input:
-    val ids        // list of identifiers to check
-    val param_csv  // Input_parameters.csv
+    val ids
+    path param_csv_file
+    path script_file
 
     output:
-    val "ok" into precheck_done  // dummy output to trigger workflow continuation
+    path "precheck_output.txt"
 
     script:
     """
-    python3 scripts/precheck_inputs.py \
-        --param_csv ${param_csv} \
-        --id ${ids}
-    """
-}
+    # Activate Conda environment
+    source "\$(conda info --base)/etc/profile.d/conda.sh"
+    conda activate "/software/cellgen/team298/ar32/envs/visiumhd_env1"
 
-// Wrapper function
-def precheck_inputs(ids, param_csv) {
-    PRECHECK_INPUTS(ids, param_csv)
+    python3 ${script_file} --param_csv ${param_csv_file} --id ${ids} > precheck_output.txt 2>&1
+
+    # Check exit status
+    if [ \$? -ne 0 ]; then
+        echo "[ERROR] precheck_inputs.py failed, see precheck_output.txt" >&2
+        exit 1
+    fi
+    """
 }

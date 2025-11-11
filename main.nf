@@ -1,60 +1,91 @@
 #!/usr/bin/env nextflow
+nextflow.enable.dsl=2
 
 // ==========================
 // Pipeline parameters
 // ==========================
-params.param_csv      = file(params.param_csv ?: 'Input_parameters.csv')
-params.outdir         = file(params.outdir ?: 'results')
-params.logdir         = file(params.logdir ?: 'logs')
-params.id             = params.id ?: 'all'
-params.overwrite      = params.overwrite ?: false
-params.python_script  = params.python_script ?: 'bin2cell_core.py'
-params.test_env_only  = params.test_env_only ?: false
+params.param_csv        = params.param_csv ?: 'Input_parameters.csv'
+params.outdir           = params.outdir ?: 'results'
+params.logdir           = params.logdir ?: 'logs'
+params.id               = params.id ?: 'all'
+params.overwrite        = params.overwrite ?: false
+params.python_script    = params.python_script ?: 'bin2cell_core.py'
+params.test_env_only    = params.test_env_only ?: false
+params.build_containers = params.build_containers ?: false
+params.build_mode       = params.build_mode ?: 'clone'       // default to clone
+params.temp_env_name    = params.temp_env_name ?: 'visiumhd_temp_build'
+params.requirements_file = params.requirements_file ?: ''
+params.env_name         = params.env_name ?: 'visiumhd_env1'
+params.env_home         = params.env_home ?: '/software/cellgen/team298/ar32/envs'
 
 // ==========================
-// Import workflows & modules
+// Import workflows
 // ==========================
-include { test_environment } from './modules/test_environment.nf'
-include { run_bin2cell } from './workflows/run_bin2cell.nf'
-
-// ==========================
-// Detect environment
-// ==========================
-
-// Default env base (matches your conf/profiles.config)
-def env_home = System.getenv('NXF_CONDA_HOME') ?: '/software/cellgen/team298/ar32/envs'
-
-// Get environment name from NEXTFLOW_CONDA_ENV if user sets it
-def env_name = System.getenv('NEXTFLOW_CONDA_ENV')
-if (!env_name?.trim()) {
-    env_name = 'visiumhd_env1'   // fallback to default
-}
-
-log.info ""
-log.info "==============================================="
-log.info "  🔬 Nextflow Conda Environment Test"
-log.info "-----------------------------------------------"
-log.info "  Base: ${env_home}"
-log.info "  Env:  ${env_name}"
-log.info "==============================================="
+include { build_containers_workflow } from './workflows/build_containers_workflow.nf'
+include { test_environment_workflow } from './workflows/test_environment_workflow.nf'
+include { run_bin2cell_workflow } from './workflows/run_bin2cell_workflow.nf'
 
 // ==========================
-// Run workflow
+// Core workflow
 // ==========================
 workflow {
 
-    log.info "\n🔍 [STEP 1] Checking environment accessibility..."
-    def env_check = test_environment(env_home, env_name)
-
-    if (params.test_env_only) {
-        log.info "\n✅ Environment test completed successfully (--test_env_only true). Exiting."
+    // -------------------------
+    // Recursion guard
+    // -------------------------
+    if (!binding.hasVariable('WORKFLOW_STARTED')) {
+        binding.WORKFLOW_STARTED = true
+    } else {
+        log.error "🚨 Workflow recursion detected! Exiting to prevent StackOverflowError."
         return
     }
 
-    env_check.env_check_done.subscribe {
-        log.info "\n✅ Environment accessible — proceeding to analysis."
+    // -------------------------
+    // Determine runtime safely based on profile/container
+    // -------------------------
+    def runtime = ''
+    if (workflow.profile == 'singularity') {
+        runtime = "Singularity Container"
+    } else if (workflow.profile == 'docker') {
+        runtime = "Docker Container"
+    } else if (workflow.profile == 'conda' || params.build_mode == 'conda') {
+        runtime = "Conda (${params.env_name})"
+    } else {
+        runtime = "Local/Host"
     }
 
-    log.info "\n🚀 [STEP 2] Running main Bin2Cell workflow..."
-    run_bin2cell(params)
+    // -------------------------
+    // Log environment info
+    // -------------------------
+    log.info "==============================================="
+    log.info "  🔬 Nextflow Environment Test"
+    log.info "-----------------------------------------------"
+    log.info "  Profile: ${workflow.profile}"
+    log.info "  Runtime: ${runtime}"
+    log.info "==============================================="
+
+    // -------------------------
+    // Build containers
+    // -------------------------
+    if (params.build_containers) {
+        log.info "\n⚙️ Building Docker/Singularity containers..."
+        build_containers_workflow()
+        return
+    }
+
+    // -------------------------
+    // Test environment
+    // -------------------------
+    log.info "\n🔍 Checking environment accessibility..."
+    test_environment_workflow(params.env_home, params.env_name)
+
+    if (params.test_env_only) {
+        return
+    }
+
+    // -------------------------
+    // Run main Bin2Cell workflow
+    // -------------------------
+    log.info "\n🚀 Running main Bin2Cell workflow..."
+    run_bin2cell_workflow()
 }

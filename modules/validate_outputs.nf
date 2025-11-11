@@ -1,30 +1,42 @@
-// Module: validate_outputs.nf
-// Checks that all expected outputs for the identifiers exist
-
 process VALIDATE_OUTPUTS {
     tag "validate_outputs"
 
+    conda = '/software/cellgen/team298/ar32/envs/visiumhd_env1'
+    debug true
+
     input:
-    val ids        // list of identifiers to check
-    val param_csv  // Input_parameters.csv
-    val outdir     // output directory
-    val logdir     // log directory
+    val result_dirs
+    path script_file
+    path param_csv_file
+    val ids
 
     output:
-    file("validation_report.txt")
+    path("validation_report.txt")
 
     script:
-    """
-    python3 scripts/validate_outputs.py \
-        --param_csv ${param_csv} \
-        --outdir ${outdir} \
-        --logdir ${logdir} \
-        --id ${ids} \
-        > validation_report.txt
-    """
-}
+    // Convert the list to a CSV string in Groovy before passing to Bash
+    def folders_csv = result_dirs.join(',')
 
-// Wrapper function for workflow
-def validate_outputs(ids, param_csv, outdir, logdir) {
-    VALIDATE_OUTPUTS(ids, param_csv, outdir, logdir)
+    """
+    # Activate Conda
+    source "\$(conda info --base)/etc/profile.d/conda.sh"
+    conda activate "/software/cellgen/team298/ar32/envs/visiumhd_env1"
+    
+    echo "[INFO] Validating outputs from all RUN_BIN2CELL runs...]"
+
+    FOLDERS_LIST="${folders_csv}"
+
+    python3 ${script_file} \
+        --param_csv ${param_csv_file} \
+        --folders \$FOLDERS_LIST \
+        --ids ${ids} \
+        > validation_report.txt 2>&1
+
+    if [ \$? -ne 0 ]; then
+        echo "[ERROR] Validation failed, see validation_report.txt" >&2
+        exit 1
+    else
+        echo "[INFO] Validation passed"
+    fi
+    """
 }

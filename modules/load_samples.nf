@@ -1,11 +1,7 @@
-// Module: load_samples.nf
-// Reads CSV and filters based on user selection
-// Returns channel of tuples: (Identifier, row)
-
-def load_samples(file_csv, selected_id) {
-
-    Channel
-        .fromPath(file_csv)
+def LOAD_SAMPLES(precheck_ch, csv_path_str, selected_id) {
+    return precheck_ch
+        // wait until precheck finishes, then emit the CSV file path
+        .map { _ -> file(csv_path_str) }
         .splitCsv(header:true)
         .map { row -> tuple(row.Identifier, row) }
         .filter { id, row ->
@@ -13,7 +9,4 @@ def load_samples(file_csv, selected_id) {
             def ids_to_run = selected_id.split(',')*.trim()
             return ids_to_run.contains(id)
         }
-        .set { samples }
-    
-    return samples
 }
