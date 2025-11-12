@@ -1,24 +1,19 @@
 process PRECHECK_INPUTS {
     tag "precheck_inputs"
 
-    conda true
-    conda = '/software/cellgen/team298/ar32/envs/visiumhd_env1'
     debug true
 
     input:
-    val ids
-    path param_csv_file
-    path script_file
+        val ids
+        path param_csv_file
+        path script_file
 
     output:
-    path "precheck_output.txt"
+        path "precheck_output.txt"
 
     script:
     """
-    # Activate Conda environment
-    source "\$(conda info --base)/etc/profile.d/conda.sh"
-    conda activate "/software/cellgen/team298/ar32/envs/visiumhd_env1"
-
+    # Run Python script directly — environment is activated automatically
     python3 ${script_file} --param_csv ${param_csv_file} --id ${ids} > precheck_output.txt 2>&1
 
     # Check exit status

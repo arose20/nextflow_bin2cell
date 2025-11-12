@@ -20,13 +20,15 @@ workflow run_bin2cell_workflow {
         // Step 1: precheck for all rows
         precheck_ch = PRECHECK_INPUTS(params.id, param_csv_file, precheck_script)
 
-        // Step 2: load samples after precheck
+        
+        //Step 2: load samples after precheck
         samples_ch = LOAD_SAMPLES(precheck_ch, param_csv_file, params.id)
 
-        // Step 3: run bin2cell with tuples (id,row)
+        //Step 3: run bin2cell with tuples (id,row)
         results_ch = RUN_BIN2CELL(samples_ch, core_bin2cell_script)
-           
-        // Step 4: Validate outputs have definately been made correctly as a self check
+        
+        
+        //Step 4: Validate outputs
         VALIDATE_OUTPUTS(
             results_ch
                 .map { r, l -> file("${projectDir}/results/${r.getName()}") }   // published folder paths
@@ -35,8 +37,9 @@ workflow run_bin2cell_workflow {
             param_csv_file,
             params.id
         )
+        
 
 
     emit:
-        results_ch
+        precheck_ch
 }
