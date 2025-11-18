@@ -3,15 +3,18 @@
 include { test_environment } from '../modules/test_environment.nf'
 
 workflow test_environment_workflow {
+
     take:
-    env_home
-    default_env_name
+        env_home
+        env_name
 
     main:
-    log.info "[INFO] Running environment accessibility test..."
+        log.info "[INFO] Running environment accessibility test..."
 
-    env_check_ch = test_environment(env_home, default_env_name)
+        // Run your actual process
+        done_ch = test_environment(env_home, env_name)
+            .map { true }   // convert to a simple "done" signal
 
     emit:
-    env_check_done = env_check_ch
+        done_ch
 }

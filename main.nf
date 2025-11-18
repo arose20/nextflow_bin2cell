@@ -1,5 +1,5 @@
 #!/usr/bin/env nextflow
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 // ==========================
 // Pipeline parameters
@@ -31,16 +31,6 @@ include { run_bin2cell_workflow } from './workflows/run_bin2cell_workflow.nf'
 workflow {
 
     // -------------------------
-    // Recursion guard
-    // -------------------------
-    if (!binding.hasVariable('WORKFLOW_STARTED')) {
-        binding.WORKFLOW_STARTED = true
-    } else {
-        log.error "🚨 Workflow recursion detected! Exiting to prevent StackOverflowError."
-        return
-    }
-
-    // -------------------------
     // Determine runtime safely based on profile/container
     // -------------------------
     def runtime = ''
@@ -58,7 +48,7 @@ workflow {
     // Log environment info
     // -------------------------
     log.info "==============================================="
-    log.info "  🔬 Nextflow Environment Test"
+    log.info "  🔬 Nextflow Environment Details"
     log.info "-----------------------------------------------"
     log.info "  Profile: ${workflow.profile}"
     log.info "  Runtime: ${runtime}"
@@ -76,13 +66,13 @@ workflow {
     // -------------------------
     // Test environment
     // -------------------------
-    log.info "\n🔍 Checking environment accessibility..."
-    test_environment_workflow(params.env_home, params.env_name)
-
+    
     if (params.test_env_only) {
+        log.info "\n🔍 Checking environment accessibility..."
+        test_environment_workflow(params.env_home, params.env_name)
         return
     }
-
+    
     // -------------------------
     // Run main Bin2Cell workflow
     // -------------------------

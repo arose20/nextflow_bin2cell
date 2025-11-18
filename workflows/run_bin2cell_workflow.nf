@@ -1,4 +1,4 @@
-nextflow.enable.dsl=2
+nextflow.enable.dsl = 2
 
 include { PRECHECK_INPUTS } from '../modules/precheck_inputs.nf'
 include { LOAD_SAMPLES } from '../modules/load_samples.nf'
@@ -7,7 +7,7 @@ include { VALIDATE_OUTPUTS } from '../modules/validate_outputs.nf'
 
 workflow run_bin2cell_workflow {
 
-    main:
+    main:        
         println "[INFO] Parameters CSV: ${params.param_csv}"
         println "[INFO] Selected ID(s): ${params.id}"
         println "[INFO] Output directory: ${params.outdir}"
@@ -29,7 +29,7 @@ workflow run_bin2cell_workflow {
         
         
         //Step 4: Validate outputs
-        VALIDATE_OUTPUTS(
+        val_ch = VALIDATE_OUTPUTS(
             results_ch
                 .map { r, l -> file("${projectDir}/results/${r.getName()}") }   // published folder paths
                 .collect(),
@@ -41,5 +41,5 @@ workflow run_bin2cell_workflow {
 
 
     emit:
-        precheck_ch
+        val_ch
 }
