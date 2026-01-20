@@ -55,15 +55,6 @@ workflow {
     log.info "==============================================="
 
     // -------------------------
-    // Build containers
-    // -------------------------
-    if (params.build_containers) {
-        log.info "\n⚙️ Building Docker/Singularity containers..."
-        build_containers_workflow()
-        return
-    }
-
-    // -------------------------
     // Test environment
     // -------------------------
     
