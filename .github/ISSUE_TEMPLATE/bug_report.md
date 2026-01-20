@@ -7,6 +7,10 @@ assignees: arose20
 
 ---
 
+**Is your request been made previously? If so then please don't repeat**
+
+---
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 

@@ -7,6 +7,10 @@ assignees: arose20
 
 ---
 
+**Is your request been made previously? If so then please don't repeat**
+
+---
+
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
