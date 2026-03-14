@@ -101,6 +101,6 @@ nextflow run main.nf --test_env_only true
 
 ## Upcoming
 
-- Optionally build containerised environments for reproducibility
+- Optionally build containerised environments on demand through shell script
     - Docker
     - Singularity
